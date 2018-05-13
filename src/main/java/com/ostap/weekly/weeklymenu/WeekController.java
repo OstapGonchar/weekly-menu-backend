@@ -57,7 +57,7 @@ public class WeekController {
   }
 
   @PostMapping()
-  public void updateWeek(Week week) {
+  public void updateWeek(@RequestBody Week week) {
     weekRepository.updateWeek(week);
   }
 
@@ -73,11 +73,11 @@ public class WeekController {
   }
 
   private WeekRange toWeekRange(WeekDesc weekDesc) {
-    String[] strings = weekDesc.getDesc().split("-");
+    String[] strings = weekDesc.getDesc().split(" - ");
     WeekRange weekRange = new WeekRange();
     weekRange.weekId = weekDesc.getId();
-    weekRange.startOfWeek = LocalDate.parse(strings[0].trim());
-    weekRange.endOfWeek = LocalDate.parse(strings[1].trim());
+    weekRange.startOfWeek = LocalDate.parse(strings[0]);
+    weekRange.endOfWeek = LocalDate.parse(strings[1]);
     return weekRange;
   }
 

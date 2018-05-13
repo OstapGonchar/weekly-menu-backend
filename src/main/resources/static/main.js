@@ -41,7 +41,7 @@ module.exports = ".fill-remaining-space {\r\n    /* This fills the remaining spa
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div>\r\n  <mat-toolbar color=\"accent\" role=\"header\">\r\n    <button mat-icon-button (click)=\"snav.toggle()\">\r\n      <mat-icon>menu</mat-icon>\r\n    </button>\r\n    <h1>{{title}}</h1>\r\n    <span class=\"fill-remaining-space\"></span>\r\n    <span>Ostap Gonchar</span>\r\n  </mat-toolbar>\r\n\r\n  <mat-sidenav-container>\r\n    <mat-sidenav #snav [mode]=\"over\">\r\n      <mat-nav-list>\r\n        <mat-list-item role=\"listitem\" *ngFor=\"let weekDesc of weekDescs\">\r\n          <button mat-raised-button (click)=\"showInfo(weekDesc.id)\">{{ weekDesc.desc }}</button>\r\n        </mat-list-item>\r\n      </mat-nav-list>\r\n    </mat-sidenav>\r\n\r\n    <mat-sidenav-content>\r\n      <h3>Selected Week: {{ week.desc }}</h3>\r\n      <mat-grid-list [cols]=\"mobileQuery.matches ? 1 : 7\" [rowHeight]=\"mobileQuery.matches ? '1:1' : '1:1.6'\">\r\n        <mat-grid-tile>\r\n          <app-day-table [(day)]=\"week.monday\"></app-day-table>\r\n        </mat-grid-tile>\r\n        <mat-grid-tile>\r\n          <app-day-table [day]=\"week.tuesday\"></app-day-table>\r\n        </mat-grid-tile>\r\n        <mat-grid-tile>\r\n          <app-day-table [day]=\"week.wednesday\"></app-day-table>\r\n        </mat-grid-tile>\r\n        <mat-grid-tile>\r\n          <app-day-table [day]=\"week.thursday\"></app-day-table>\r\n        </mat-grid-tile>\r\n        <mat-grid-tile>\r\n          <app-day-table [day]=\"week.friday\"></app-day-table>\r\n        </mat-grid-tile>\r\n        <mat-grid-tile>\r\n          <app-day-table [day]=\"week.saturday\"></app-day-table>\r\n        </mat-grid-tile>\r\n        <mat-grid-tile>\r\n          <app-day-table [day]=\"week.sunday\"></app-day-table>\r\n        </mat-grid-tile>\r\n      </mat-grid-list>\r\n    </mat-sidenav-content>\r\n  </mat-sidenav-container>\r\n</div>"
+module.exports = "<div>\r\n  <mat-toolbar color=\"accent\" role=\"header\">>\r\n    <h1>{{title}}</h1>\r\n    <span class=\"fill-remaining-space\"></span>\r\n    <span>Ostap Gonchar</span>\r\n  </mat-toolbar>\r\n\r\n  <mat-grid-list [cols]=3 rowHeight=\"50px\">\r\n    <mat-grid-tile>\r\n      <mat-form-field>\r\n        <mat-select [ngModel]=\"selectedWeekId\" (ngModelChange)=\"showInfo($event)\">\r\n          <mat-option *ngFor=\"let weekDesc of weekDescs\" [value]=\"weekDesc.id\">\r\n            {{ weekDesc.desc }}\r\n          </mat-option>\r\n        </mat-select>\r\n      </mat-form-field>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <h3 *ngIf=\"week != undefined\">Selected Week: {{ week.desc }}</h3>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <button mat-button color=\"primary\" (click)=\"save()\">Save</button>\r\n    </mat-grid-tile>\r\n  </mat-grid-list>\r\n\r\n  <mat-grid-list *ngIf=\"week != undefined\" [cols]=\"mobileQuery.matches ? 1 : 7\" [rowHeight]=\"mobileQuery.matches ? '1:1' : '1:1.6'\">\r\n    <mat-grid-tile>\r\n      <app-day-table [(day)]=\"week.monday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.tuesday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.wednesday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.thursday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.friday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.saturday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.sunday\"></app-day-table>\r\n    </mat-grid-tile>\r\n  </mat-grid-list>\r\n</div>"
 
 /***/ }),
 
@@ -80,11 +80,22 @@ var AppComponent = /** @class */ (function () {
         this.mobileQuery.addListener(this._mobileQueryListener);
     }
     AppComponent.prototype.ngOnInit = function () {
-        this.weekDescs = this.weeklyMenuService.getWeekDescs();
-        this.week = this.weeklyMenuService.getCurrentWeek();
+        var _this = this;
+        this.weeklyMenuService.getWeekDescs()
+            .subscribe(function (weekDescs) { return _this.weekDescs = weekDescs; });
+        this.weeklyMenuService.getCurrentWeek()
+            .subscribe(function (week) {
+            _this.week = week;
+            _this.selectedWeekId = _this.week.id;
+        });
     };
     AppComponent.prototype.showInfo = function (id) {
-        this.week = this.weeklyMenuService.getWeek(id);
+        var _this = this;
+        this.weeklyMenuService.getWeek(id)
+            .subscribe(function (week) { return _this.week = week; });
+    };
+    AppComponent.prototype.save = function () {
+        this.weeklyMenuService.save(this.week);
     };
     AppComponent.prototype.ngOnDestroy = function () {
         this.mobileQuery.removeListener(this._mobileQueryListener);
@@ -117,11 +128,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/platform-browser */ "./node_modules/@angular/platform-browser/fesm5/platform-browser.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
-/* harmony import */ var _angular_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/http */ "./node_modules/@angular/http/fesm5/http.js");
-/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
-/* harmony import */ var _angular_material__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/material */ "./node_modules/@angular/material/esm5/material.es5.js");
-/* harmony import */ var _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/platform-browser/animations */ "./node_modules/@angular/platform-browser/fesm5/animations.js");
-/* harmony import */ var _day_table_day_table_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./day-table/day-table.component */ "./src/app/day-table/day-table.component.ts");
+/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
+/* harmony import */ var _angular_material__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/material */ "./node_modules/@angular/material/esm5/material.es5.js");
+/* harmony import */ var _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/platform-browser/animations */ "./node_modules/@angular/platform-browser/fesm5/animations.js");
+/* harmony import */ var _day_table_day_table_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./day-table/day-table.component */ "./src/app/day-table/day-table.component.ts");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -142,30 +153,30 @@ var AppModule = /** @class */ (function () {
     AppModule = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["NgModule"])({
             declarations: [
-                _app_component__WEBPACK_IMPORTED_MODULE_4__["AppComponent"],
-                _day_table_day_table_component__WEBPACK_IMPORTED_MODULE_7__["DayTableComponent"]
+                _app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"],
+                _day_table_day_table_component__WEBPACK_IMPORTED_MODULE_6__["DayTableComponent"]
             ],
             imports: [
                 _angular_platform_browser__WEBPACK_IMPORTED_MODULE_0__["BrowserModule"],
                 _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormsModule"],
-                _angular_http__WEBPACK_IMPORTED_MODULE_3__["HttpModule"],
-                _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_6__["BrowserAnimationsModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatInputModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatButtonModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatSelectModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatIconModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatSidenavModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatCheckboxModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatToolbarModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatListModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatGridListModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatSelectModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatDatepickerModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatNativeDateModule"],
-                _angular_material__WEBPACK_IMPORTED_MODULE_5__["MatCardModule"]
+                _angular_common_http__WEBPACK_IMPORTED_MODULE_7__["HttpClientModule"],
+                _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_5__["BrowserAnimationsModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatInputModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatButtonModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatSelectModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatIconModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatSidenavModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatCheckboxModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatToolbarModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatListModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatGridListModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatSelectModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatDatepickerModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatNativeDateModule"],
+                _angular_material__WEBPACK_IMPORTED_MODULE_4__["MatCardModule"]
             ],
             providers: [],
-            bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_4__["AppComponent"]]
+            bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_3__["AppComponent"]]
         })
     ], AppModule);
     return AppModule;
@@ -270,215 +281,6 @@ var Day = /** @class */ (function () {
 
 /***/ }),
 
-/***/ "./src/app/mock-data.ts":
-/*!******************************!*\
-  !*** ./src/app/mock-data.ts ***!
-  \******************************/
-/*! exports provided: WEEK_DESCS, WEEK_1, WEEK_2, WEEK_3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WEEK_DESCS", function() { return WEEK_DESCS; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WEEK_1", function() { return WEEK_1; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WEEK_2", function() { return WEEK_2; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WEEK_3", function() { return WEEK_3; });
-/* harmony import */ var _week__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./week */ "./src/app/week.ts");
-
-var WEEK_DESCS = [
-    {
-        id: 3,
-        desc: '14.05.2016 - 20.05.2018'
-    },
-    {
-        id: 2,
-        desc: '07.05.2018 - 13.05.2018'
-    },
-    {
-        id: 1,
-        desc: '30.04.2018 - 06.05.2018'
-    }
-];
-var WEEK_1 = new _week__WEBPACK_IMPORTED_MODULE_0__["Week"]();
-WEEK_1.id = 1;
-WEEK_1.desc = '30.04.2018 - 06.05.2018';
-WEEK_1.monday = {
-    date: new Date(2018, 3, 30),
-    dayOfWeek: 'Monday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_1.tuesday = {
-    date: new Date(2018, 4, 1),
-    dayOfWeek: 'Tuesday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_1.wednesday = {
-    date: new Date(2018, 4, 2),
-    dayOfWeek: 'Wednesday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_1.thursday = {
-    date: new Date(2018, 4, 3),
-    dayOfWeek: 'Thursday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_1.friday = {
-    date: new Date(2018, 4, 4),
-    dayOfWeek: 'Friday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_1.saturday = {
-    date: new Date(2018, 4, 5),
-    dayOfWeek: 'Saturday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_1.sunday = {
-    date: new Date(2018, 4, 6),
-    dayOfWeek: 'Sunday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-var WEEK_2 = new _week__WEBPACK_IMPORTED_MODULE_0__["Week"]();
-WEEK_2.id = 2;
-WEEK_2.desc = '07.05.2018 - 13.05.2018';
-WEEK_2.monday = {
-    date: new Date(2018, 4, 7),
-    dayOfWeek: 'Monday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_2.tuesday = {
-    date: new Date(2018, 4, 8),
-    dayOfWeek: 'Tuesday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_2.wednesday = {
-    date: new Date(2018, 4, 9),
-    dayOfWeek: 'Wednesday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_2.thursday = {
-    date: new Date(2018, 4, 10),
-    dayOfWeek: 'Thursday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_2.friday = {
-    date: new Date(2018, 4, 11),
-    dayOfWeek: 'Friday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_2.saturday = {
-    date: new Date(2018, 4, 12),
-    dayOfWeek: 'Saturday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_2.sunday = {
-    date: new Date(2018, 4, 13),
-    dayOfWeek: 'Sunday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-var WEEK_3 = new _week__WEBPACK_IMPORTED_MODULE_0__["Week"]();
-WEEK_3.id = 3;
-WEEK_3.desc = '14.05.2016 - 20.05.2018';
-WEEK_3.monday = {
-    date: new Date(2018, 4, 14),
-    dayOfWeek: 'Monday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_3.tuesday = {
-    date: new Date(2018, 4, 15),
-    dayOfWeek: 'Tuesday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_3.wednesday = {
-    date: new Date(2018, 4, 16),
-    dayOfWeek: 'Wednesday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_3.thursday = {
-    date: new Date(2018, 4, 17),
-    dayOfWeek: 'Thursday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_3.friday = {
-    date: new Date(2018, 4, 18),
-    dayOfWeek: 'Friday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_3.saturday = {
-    date: new Date(2018, 4, 19),
-    dayOfWeek: 'Saturday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-WEEK_3.sunday = {
-    date: new Date(2018, 4, 20),
-    dayOfWeek: 'Sunday',
-    breakfast: '',
-    lunch: '',
-    dinner: ''
-};
-
-
-/***/ }),
-
-/***/ "./src/app/week.ts":
-/*!*************************!*\
-  !*** ./src/app/week.ts ***!
-  \*************************/
-/*! exports provided: Week */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Week", function() { return Week; });
-var Week = /** @class */ (function () {
-    function Week() {
-    }
-    return Week;
-}());
-
-
-
-/***/ }),
-
 /***/ "./src/app/weekly-menu.service.ts":
 /*!****************************************!*\
   !*** ./src/app/weekly-menu.service.ts ***!
@@ -490,7 +292,7 @@ var Week = /** @class */ (function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WeeklyMenuService", function() { return WeeklyMenuService; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _mock_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./mock-data */ "./src/app/mock-data.ts");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -502,28 +304,35 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 };
 
 
+var httpOptions = {
+    headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpHeaders"]({ 'Content-Type': 'application/json' })
+};
 var WeeklyMenuService = /** @class */ (function () {
-    function WeeklyMenuService() {
+    function WeeklyMenuService(http) {
+        this.http = http;
     }
+    WeeklyMenuService.prototype.save = function (week) {
+        this.http.post('/week', week, httpOptions)
+            .subscribe(function (res) {
+            console.log(res);
+        }, function (err) {
+            console.log('Error occured');
+        });
+    };
     WeeklyMenuService.prototype.getWeekDescs = function () {
-        return _mock_data__WEBPACK_IMPORTED_MODULE_1__["WEEK_DESCS"];
+        return this.http.get('/week/week-desc');
     };
     WeeklyMenuService.prototype.getWeek = function (id) {
-        switch (id) {
-            case 1: return _mock_data__WEBPACK_IMPORTED_MODULE_1__["WEEK_1"];
-            case 2: return _mock_data__WEBPACK_IMPORTED_MODULE_1__["WEEK_2"];
-            case 3: return _mock_data__WEBPACK_IMPORTED_MODULE_1__["WEEK_3"];
-            default: return _mock_data__WEBPACK_IMPORTED_MODULE_1__["WEEK_1"];
-        }
+        return this.http.get("/week/" + id);
     };
     WeeklyMenuService.prototype.getCurrentWeek = function () {
-        return _mock_data__WEBPACK_IMPORTED_MODULE_1__["WEEK_1"];
+        return this.http.get('/week/current');
     };
     WeeklyMenuService = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
             providedIn: 'root'
         }),
-        __metadata("design:paramtypes", [])
+        __metadata("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_1__["HttpClient"]])
     ], WeeklyMenuService);
     return WeeklyMenuService;
 }());

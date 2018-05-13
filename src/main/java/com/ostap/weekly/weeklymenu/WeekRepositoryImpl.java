@@ -131,11 +131,12 @@ public class WeekRepositoryImpl implements WeekRepository {
   }
 
   private void updateDay(Connection connection, int weekId, Day day) throws SQLException {
-    PreparedStatement dayStatement = connection.prepareStatement("UPDATE DAY SET breakfast = ?, lunch = ?, dinner = ? WHERE week_id = ?");
+    PreparedStatement dayStatement = connection.prepareStatement("UPDATE DAY SET breakfast = ?, lunch = ?, dinner = ? WHERE week_id = ? AND day_of_week = ?");
     dayStatement.setString(1, day.getBreakfast());
     dayStatement.setString(2, day.getLunch());
     dayStatement.setString(3, day.getDinner());
     dayStatement.setInt(4, weekId);
-    dayStatement.execute();
+    dayStatement.setString(5, day.getDayOfWeek());
+    dayStatement.executeUpdate();
   }
 }
