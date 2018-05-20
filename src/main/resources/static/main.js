@@ -41,7 +41,7 @@ module.exports = ".fill-remaining-space {\r\n    /* This fills the remaining spa
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div>\r\n  <mat-toolbar color=\"accent\" role=\"header\">\r\n    <h1>{{title}}</h1>\r\n    <span class=\"fill-remaining-space\"></span>\r\n    <span>Ostap Gonchar</span>\r\n  </mat-toolbar>\r\n\r\n  <mat-grid-list [cols]=4 rowHeight=\"50px\">\r\n    <mat-grid-tile>\r\n      <mat-form-field>\r\n        <mat-select [ngModel]=\"selectedWeekId\" (ngModelChange)=\"showInfo($event)\">\r\n          <mat-option *ngFor=\"let weekDesc of weekDescs\" [value]=\"weekDesc.id\">\r\n            {{ weekDesc.desc }}\r\n          </mat-option>\r\n        </mat-select>\r\n      </mat-form-field>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <h3 *ngIf=\"week != undefined\">Selected Week: {{ week.desc }}</h3>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <button mat-button color=\"primary\" (click)=\"addExtra()\">Add One More</button>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <button mat-button color=\"primary\" (click)=\"save()\">Save</button>\r\n    </mat-grid-tile>\r\n  </mat-grid-list>\r\n\r\n  <mat-grid-list *ngIf=\"week != undefined\" [cols]=\"mobileQuery.matches ? 1 : 7\" [rowHeight]=\"mobileQuery.matches ? '1:1' : '1:1.6'\">\r\n    <mat-grid-tile>\r\n      <app-day-table [(day)]=\"week.monday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.tuesday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.wednesday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.thursday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.friday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.saturday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.sunday\"></app-day-table>\r\n    </mat-grid-tile>\r\n  </mat-grid-list>\r\n</div>"
+module.exports = "<div>\r\n  <mat-toolbar color=\"accent\" role=\"header\">\r\n    <h1>{{title}}</h1>\r\n    <span class=\"fill-remaining-space\"></span>\r\n    <span>Ostap Gonchar</span>\r\n  </mat-toolbar>\r\n\r\n  <mat-grid-list [cols]=\"mobileQuery.matches ? 1 : 4\" rowHeight=\"50px\">\r\n    <mat-grid-tile>\r\n      <mat-form-field>\r\n        <mat-select style=\"width: 200px\" [ngModel]=\"selectedWeekId\" (ngModelChange)=\"showInfo($event)\">\r\n          <mat-option *ngFor=\"let weekDesc of weekDescs\" [value]=\"weekDesc.id\">\r\n            {{ weekDesc.desc }}\r\n          </mat-option>\r\n        </mat-select>\r\n      </mat-form-field>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <h3 *ngIf=\"week != undefined\">Selected Week: {{ week.desc }}</h3>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <button mat-button color=\"primary\" (click)=\"addExtra()\">Add One More</button>\r\n      <button mat-button color=\"primary\" (click)=\"delete()\">Delete</button>\r\n      <button mat-button color=\"primary\" (click)=\"save()\">Save</button>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <span style=\"color:greenyellow;font-weight: bold\" *ngIf=\"isSuccess\"><h2>{{message}}</h2></span>\r\n    </mat-grid-tile>\r\n  </mat-grid-list>\r\n\r\n  <mat-grid-list *ngIf=\"week != undefined\" [cols]=\"mobileQuery.matches ? 1 : 7\" [rowHeight]=\"mobileQuery.matches ? '1:1' : '1:1.6'\">\r\n    <mat-grid-tile>\r\n      <app-day-table [(day)]=\"week.monday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.tuesday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.wednesday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.thursday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.friday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.saturday\"></app-day-table>\r\n    </mat-grid-tile>\r\n    <mat-grid-tile>\r\n      <app-day-table [day]=\"week.sunday\"></app-day-table>\r\n    </mat-grid-tile>\r\n  </mat-grid-list>\r\n</div>"
 
 /***/ }),
 
@@ -70,39 +70,89 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 
 
 
+
 var AppComponent = /** @class */ (function () {
     function AppComponent(weeklyMenuService, changeDetectorRef, media) {
         this.weeklyMenuService = weeklyMenuService;
         this.title = 'Weekly Menu';
         this.weekDescs = [];
+        this.message = '';
+        this.isSuccess = false;
         this.mobileQuery = media.matchMedia('(max-width: 600px)');
         this._mobileQueryListener = function () { return changeDetectorRef.detectChanges(); };
         this.mobileQuery.addListener(this._mobileQueryListener);
     }
+    AppComponent.prototype.handleKeyboardEvent = function (event) {
+        // console.log(event.key);
+        if (event.key === 'Enter') {
+            this.save();
+        }
+    };
     AppComponent.prototype.ngOnInit = function () {
         var _this = this;
-        this.weeklyMenuService.getWeekDescs()
-            .subscribe(function (weekDescs) { return _this.weekDescs = weekDescs; });
+        this.loadWeekDescs();
         this.weeklyMenuService.getCurrentWeek()
             .subscribe(function (week) {
             _this.week = week;
             _this.selectedWeekId = _this.week.id;
         });
     };
+    AppComponent.prototype.loadWeekDescs = function () {
+        var _this = this;
+        this.weeklyMenuService.getWeekDescs()
+            .subscribe(function (weekDescs) { return _this.weekDescs = weekDescs; });
+    };
     AppComponent.prototype.showInfo = function (id) {
         var _this = this;
         this.weeklyMenuService.getWeek(id)
             .subscribe(function (week) { return _this.week = week; });
     };
+    AppComponent.prototype.delete = function () {
+        var _this = this;
+        this.weeklyMenuService.delete(this.week.id)
+            .subscribe(function (res) {
+            console.log(res);
+            _this.refresh();
+        }, function (err) {
+            console.log('Error occured');
+            _this.refresh();
+        });
+    };
     AppComponent.prototype.save = function () {
-        this.weeklyMenuService.save(this.week);
+        var _this = this;
+        this.weeklyMenuService.save(this.week)
+            .subscribe(function (res) {
+            console.log(res);
+            _this.displaySuccess('Successfully saved');
+        }, function (err) {
+            console.log('Error occured');
+        });
+    };
+    AppComponent.prototype.displaySuccess = function (message) {
+        var _this = this;
+        this.message = message;
+        this.isSuccess = true;
+        setTimeout(function () {
+            _this.isSuccess = false;
+            _this.message = '';
+        }, 1000);
     };
     AppComponent.prototype.addExtra = function () {
         this.weeklyMenuService.addExtra();
+        this.refresh();
     };
     AppComponent.prototype.ngOnDestroy = function () {
         this.mobileQuery.removeListener(this._mobileQueryListener);
     };
+    AppComponent.prototype.refresh = function () {
+        window.location.reload();
+    };
+    __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["HostListener"])('document:keypress', ['$event']),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [KeyboardEvent]),
+        __metadata("design:returntype", void 0)
+    ], AppComponent.prototype, "handleKeyboardEvent", null);
     AppComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
             selector: 'app-root',
@@ -315,12 +365,7 @@ var WeeklyMenuService = /** @class */ (function () {
         this.http = http;
     }
     WeeklyMenuService.prototype.save = function (week) {
-        this.http.post('/week', week, httpOptions)
-            .subscribe(function (res) {
-            console.log(res);
-        }, function (err) {
-            console.log('Error occured');
-        });
+        return this.http.post('/week', week, httpOptions);
     };
     WeeklyMenuService.prototype.getWeekDescs = function () {
         return this.http.get('/week/week-desc');
@@ -330,6 +375,9 @@ var WeeklyMenuService = /** @class */ (function () {
     };
     WeeklyMenuService.prototype.getCurrentWeek = function () {
         return this.http.get('/week/current');
+    };
+    WeeklyMenuService.prototype.delete = function (id) {
+        return this.http.delete("/week/" + id);
     };
     WeeklyMenuService.prototype.addExtra = function () {
         this.http.get('/week/add-extra')

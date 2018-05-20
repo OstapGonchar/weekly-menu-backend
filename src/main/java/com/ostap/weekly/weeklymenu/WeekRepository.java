@@ -11,4 +11,6 @@ public interface WeekRepository {
   void updateWeek(Week week);
 
   void addWeek(Week week);
+
+  void deleteWeek(int id);
 }

@@ -26,7 +26,7 @@ public class WeekRepositoryImpl implements WeekRepository {
   @Override
   public Week getWeek(int id) {
     try (Connection connection = dataSource.getConnection()) {
-      PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, \"desc\" FROM WEEK WHERE id = ?");
+      PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, \"desc\" FROM week WHERE id = ?");
       preparedStatement.setInt(1, id);
       ResultSet resultSet = preparedStatement.executeQuery();
       if (resultSet.next()) {
@@ -50,31 +50,11 @@ public class WeekRepositoryImpl implements WeekRepository {
     }
   }
 
-  private Day getDay(Connection connection, int weekId, DayOfWeek dayOfWeek) throws SQLException {
-    PreparedStatement preparedStatement = connection.prepareStatement("SELECT date, breakfast, lunch, dinner FROM DAY WHERE week_id = ? AND day_of_week = ?");
-    preparedStatement.setInt(1, weekId);
-    String dayOfWeekDisplayName = dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-    preparedStatement.setString(2, dayOfWeekDisplayName);
-    ResultSet resultSet = preparedStatement.executeQuery();
-    if (resultSet.next()) {
-      return Day.builder()
-        .weekId(weekId)
-        .date(resultSet.getDate("date").toLocalDate())
-        .dayOfWeek(dayOfWeekDisplayName)
-        .breakfast(resultSet.getString("breakfast"))
-        .lunch(resultSet.getString("lunch"))
-        .dinner(resultSet.getString("dinner"))
-        .build();
-    } else {
-      throw new RuntimeException(format("Day of week %s with week id %d doesn't exist", dayOfWeekDisplayName, weekId));
-    }
-  }
-
   @Override
   public List<WeekDesc> getAllWeekDesc() {
     ArrayList<WeekDesc> weekDescList = new ArrayList<>();
     try (Connection connection = dataSource.getConnection()) {
-      PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, \"desc\" FROM WEEK");
+      PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, \"desc\" FROM week");
       ResultSet resultSet = preparedStatement.executeQuery();
       while (resultSet.next()) {
         weekDescList.add(new WeekDesc(resultSet.getInt("id"), resultSet.getString("desc")));
@@ -104,7 +84,7 @@ public class WeekRepositoryImpl implements WeekRepository {
   @Override
   public void addWeek(Week week) {
     try (Connection connection = dataSource.getConnection()) {
-      PreparedStatement weekStatement = connection.prepareStatement("INSERT INTO WEEK (\"desc\") VALUES (?) RETURNING id");
+      PreparedStatement weekStatement = connection.prepareStatement("INSERT INTO week (\"desc\") VALUES (?) RETURNING id");
       weekStatement.setString(1, week.getDesc());
       ResultSet resultSet = weekStatement.executeQuery();
       if (resultSet.next()) {
@@ -122,8 +102,42 @@ public class WeekRepositoryImpl implements WeekRepository {
     }
   }
 
+  @Override
+  public void deleteWeek(int id) {
+    try (Connection connection = dataSource.getConnection()) {
+      PreparedStatement deleteDays = connection.prepareStatement("DELETE FROM day WHERE week_id = ?");
+      deleteDays.setInt(1, id);
+      deleteDays.execute();
+      PreparedStatement deleteWeek = connection.prepareStatement("DELETE FROM week WHERE id = ?");
+      deleteWeek.setInt(1, id);
+      deleteWeek.execute();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Day getDay(Connection connection, int weekId, DayOfWeek dayOfWeek) throws SQLException {
+    PreparedStatement preparedStatement = connection.prepareStatement("SELECT date, breakfast, lunch, dinner FROM day WHERE week_id = ? AND day_of_week = ?");
+    preparedStatement.setInt(1, weekId);
+    String dayOfWeekDisplayName = dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+    preparedStatement.setString(2, dayOfWeekDisplayName);
+    ResultSet resultSet = preparedStatement.executeQuery();
+    if (resultSet.next()) {
+      return Day.builder()
+        .weekId(weekId)
+        .date(resultSet.getDate("date").toLocalDate())
+        .dayOfWeek(dayOfWeekDisplayName)
+        .breakfast(resultSet.getString("breakfast"))
+        .lunch(resultSet.getString("lunch"))
+        .dinner(resultSet.getString("dinner"))
+        .build();
+    } else {
+      throw new RuntimeException(format("Day of week %s with week id %d doesn't exist", dayOfWeekDisplayName, weekId));
+    }
+  }
+
   private void insertDay(Connection connection, int weekId, Day day) throws SQLException {
-    PreparedStatement dayStatement = connection.prepareStatement("INSERT INTO DAY (week_id, date, day_of_week) VALUES (?, ?, ?)");
+    PreparedStatement dayStatement = connection.prepareStatement("INSERT INTO day (week_id, date, day_of_week) VALUES (?, ?, ?)");
     dayStatement.setInt(1, weekId);
     dayStatement.setDate(2, Date.valueOf(day.getDate()));
     dayStatement.setString(3, day.getDayOfWeek());
@@ -131,7 +145,7 @@ public class WeekRepositoryImpl implements WeekRepository {
   }
 
   private void updateDay(Connection connection, int weekId, Day day) throws SQLException {
-    PreparedStatement dayStatement = connection.prepareStatement("UPDATE DAY SET breakfast = ?, lunch = ?, dinner = ? WHERE week_id = ? AND day_of_week = ?");
+    PreparedStatement dayStatement = connection.prepareStatement("UPDATE day SET breakfast = ?, lunch = ?, dinner = ? WHERE week_id = ? AND day_of_week = ?");
     dayStatement.setString(1, day.getBreakfast());
     dayStatement.setString(2, day.getLunch());
     dayStatement.setString(3, day.getDinner());

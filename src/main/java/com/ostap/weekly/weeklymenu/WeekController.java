@@ -37,7 +37,7 @@ public class WeekController {
       .findFirst()
       .map(weekRange -> weekRepository.getWeek(weekRange.weekId))
       .orElseGet(() -> {
-        createNewWeek(currentDate);
+        weekRepository.addWeek(createNewWeek(currentDate));
         return getCurrentWeek();
       });
   }
@@ -59,6 +59,11 @@ public class WeekController {
   @PostMapping()
   public void updateWeek(@RequestBody Week week) {
     weekRepository.updateWeek(week);
+  }
+
+  @DeleteMapping("{id}")
+  public void deleteWeek(@PathVariable int id) {
+    weekRepository.deleteWeek(id);
   }
 
   @GetMapping("{id}")
