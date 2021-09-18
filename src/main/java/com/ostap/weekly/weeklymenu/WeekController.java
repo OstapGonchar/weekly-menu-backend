@@ -12,6 +12,9 @@ import java.util.function.Predicate;
 
 import static java.time.DayOfWeek.*;
 
+/**
+ * Controller for week management
+ */
 @RestController
 @RequestMapping("week")
 public class WeekController {
